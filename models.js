@@ -61,7 +61,8 @@ const Recipes = {
       id: uuid.v4(),
       ingredients: ingredients
     };
-    this.items[item.id] = item;
+    // adds the item obj to the items array ??
+    this.items[item.id] = item;  
     return item;
   },
   get: function() {
