@@ -149,4 +149,58 @@ describe("Shopping List", function() {
         })
     );
   });
+
+// test strategy:
+  //   1. make request to `/recipes`
+  //   2. inspect response object and prove has right code and have
+  //   right keys in response object.
+  it("should list items on GET", function() {
+    // for Mocha tests, when we're dealing with asynchronous operations,
+    // we must either return a Promise object or else call a `done` callback
+    // at the end of the test. The `chai.request(server).get...` call is asynchronous
+    // and returns a Promise, so we just return it.
+    return chai
+      .request(app)
+      .get("/recipes")
+      .then(function(res) {
+        expect(res).to.have.status(200);
+        expect(res).to.be.json;
+        expect(res.body).to.be.a("array");
+
+        // because we create three items on app load
+        expect(res.body.length).to.be.at.least(1);
+        // each item should be an object with key/value pairs
+        // for `id`, `name` and `checked`.
+        const expectedKeys = ["id", "name", "ingredients"];
+        res.body.forEach(function(item) {
+          expect(item).to.be.a("object");
+          expect(item).to.include.keys(expectedKeys);
+        });
+      });
+  });
+
+// test strategy:
+  //  1. make a POST request with data for a new item
+  //  2. inspect response object and prove it has right
+  //  status code and that the returned object has an `id`
+  it("should add an item on POST", function() {
+    const newItem = { name: "Roasted Chicken", ingredients: ["chicken", "1 cup heavy cream", "salt & Pepper", "1 garlic clove" ]};
+    return chai
+      .request(app)
+      .post("/recipes")
+      .send(newItem)
+      .then(function(res) {
+        expect(res).to.have.status(201);
+        expect(res).to.be.json;
+        expect(res.body).to.be.a("object");
+        expect(res.body).to.include.keys("id", "name", "ingredients");
+        expect(res.body.id).to.not.equal(null);
+        // response should be deep equal to `newItem` from above if we assign
+        // `id` to it from `res.body.id`
+        expect(res.body).to.deep.equal(
+          Object.assign(newItem, { id: res.body.id })
+        );
+      });
+  });
+
 });
